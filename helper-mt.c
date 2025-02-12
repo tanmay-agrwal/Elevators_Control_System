@@ -1,4 +1,4 @@
-#include "helper-program.h"
+#include "helper-mt.h"
 
 struct timeval start, stop;
 
