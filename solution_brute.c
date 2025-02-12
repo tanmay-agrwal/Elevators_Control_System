@@ -6,14 +6,11 @@
 #include <sys/msg.h>
 #include <sys/shm.h>
 #include <sys/types.h>
-#include <pthread.h>
 #include <limits.h>
 
 #define CAPS 4
 
-// pthread_mutex_t mutex;
 int m;
-// pthread_mutex_t *restriction;
 int *authStatus;
 
 
@@ -212,70 +209,6 @@ typedef struct TurnChangeRequest{
 }TurnChangeRequest;
 
 
-
-// int assignElevator(int start, int end, int n, int k, char *direction, int *passengerCount, MainSharedMemory *mainShmPtr){
-//     int bestScore=INT_MIN;
-//     int elevator=0;
-
-//     for(int i=0; i<n; i++){
-//         int distScore=((k/2)-abs(mainShmPtr->elevatorFloors[i]-start))*100;
-
-//         int dirScore;
-
-//         if(start<end){
-//             if(direction[i]=='u'){
-//                 if(mainShmPtr->elevatorFloors[i]<=start){
-//                     dirScore=10000;
-//                 }
-//                 else if(mainShmPtr->elevatorFloors[i]>start && mainShmPtr->elevatorFloors[i]<end){
-//                     dirScore=0;
-//                 }
-//                 else{
-//                     dirScore=-10000;
-//                 }
-//             }
-//             else if(direction[i]=='s'){
-//                 dirScore=5000;
-//             }
-//             else{
-//                 dirScore=-10000;
-//             }
-//         }
-//         else{
-//             if(direction[i]=='d'){
-//                 if(mainShmPtr->elevatorFloors[i]>=start){
-//                     dirScore=10000;
-//                 }
-//                 else if(mainShmPtr->elevatorFloors[i]<start && mainShmPtr->elevatorFloors[i]>end){
-//                     dirScore=0;
-//                 }
-//                 else{
-//                     dirScore=-10000;
-//                 }
-//             }
-//             else if(direction[i]=='s'){
-//                 dirScore=5000;
-//             }
-//             else{
-//                 dirScore=-10000;
-//             }
-//         }
-
-//         int capScore=((CAPS/2)-passengerCount[i])*500;
-
-//         int totalScore=dirScore+distScore+capScore;
-
-//         if(totalScore>bestScore){
-//             bestScore=totalScore;
-//             elevator=i;
-//         }
-//     }
-
-//     return elevator;
-// }
-
-
-
 void dropPassengers(int key, int elevator, MainSharedMemory *mainShmPtr, int *passengerCount, TurnChangeRequest *turnRequest, check **stops){
     Node2 *current=dropMap[key];
 
@@ -291,16 +224,12 @@ void dropPassengers(int key, int elevator, MainSharedMemory *mainShmPtr, int *pa
 
                 mainShmPtr->droppedPassengers[turnRequest->droppedPassengersCount]=id;
 
-                // pthread_mutex_lock(&mutex);
-
                 turnRequest->droppedPassengersCount++;
                 passengerCount[elevator]--;
                 stops[elevator][key].drop--;
 
                 deleteDropMap(masterCurrent->data.end, id);
                 deleteMasterMap(id);
-
-                // pthread_mutex_unlock(&mutex);
 
                 current=dropMap[key];
                 reset=1;
@@ -337,8 +266,6 @@ void pickPassengers(int key, int elevator, MainSharedMemory *mainShmPtr, int *pa
                 mainShmPtr->pickedUpPassengers[turnRequest->pickedUpPassengersCount][0]=id;
                 mainShmPtr->pickedUpPassengers[turnRequest->pickedUpPassengersCount][1]=elevator;
 
-                // pthread_mutex_lock(&mutex);
-
                 turnRequest->pickedUpPassengersCount++;
                 passengerCount[elevator]++;
                 stops[elevator][masterCurrent->data.end].drop++;
@@ -346,8 +273,6 @@ void pickPassengers(int key, int elevator, MainSharedMemory *mainShmPtr, int *pa
                 
                 insertDropMap(masterCurrent->data.end, id);
                 deletePickMap(masterCurrent->data.start, id);
-
-                // pthread_mutex_unlock(&mutex);
                 
                 current=pickMap[key];
                 reset=1;
@@ -384,9 +309,6 @@ void authorization(int index, int length, int solverKey, MainSharedMemory *mainS
     char stringGuess[25];
     int factor=0;
 
-
-    // pthread_mutex_lock(&restriction[solverNumber]);
-
     solRequest.mtype=2;
     solRequest.elevatorNumber=index;
     msgsnd(solverKey, &solRequest, sizeof(solRequest)-sizeof(solRequest.mtype), 0);
@@ -406,8 +328,6 @@ void authorization(int index, int length, int solverKey, MainSharedMemory *mainS
 
         factor++;
     }
-    
-    // pthread_mutex_unlock(&restriction[solverNumber]);
 }
 
 
@@ -427,7 +347,6 @@ typedef struct ThreadData{
 
 
 void elevatorTask(ThreadData *data){
-    // ThreadData *data=(ThreadData *)arg;
     int elevator=data->elevator;
     int *passengerCount=data->passengerCount;
     int *passengerCountLag=data->passengerCountLag;
@@ -514,8 +433,6 @@ void elevatorTask(ThreadData *data){
     else{
         authStatus[elevator]=1;
     }
-
-    // pthread_exit(NULL);
 }
 
 
@@ -562,15 +479,8 @@ int main(){
 
     TurnChangeResponse turnResponse;
     TurnChangeRequest turnRequest;
-
-    // pthread_mutex_init(&mutex, NULL);
     
     authStatus=(int *)malloc(n*sizeof(int));
-
-    // restriction=(pthread_mutex_t *)malloc(m*sizeof(pthread_mutex_t));
-    // for(int i=0; i<m; i++){
-    //     pthread_mutex_init(&restriction[i], NULL);
-    // }
     
 
     while(1){
@@ -589,7 +499,6 @@ int main(){
         for(int i=0; turnResponse.turnNumber<=t && i<turnResponse.newPassengerRequestCount; i++){
             PassengerRequest request=mainShmPtr->newPassengerRequests[i];
 
-            // int elev=assignElevator(request.startFloor, request.requestedFloor, n, k, direction, passengerCount, mainShmPtr);
             int elev=i%n;
             allRequests req={request.requestId, request.startFloor, request.requestedFloor, elev, 0, 0};
 
@@ -604,22 +513,7 @@ int main(){
         turnRequest.droppedPassengersCount=0;
         turnRequest.pickedUpPassengersCount=0;
 
-
-        pthread_t threads[n];
-        ThreadData threadData[n];
-
         for(int i=0; i<n; i++){
-            // threadData[i].elevator=i;
-            // threadData[i].passengerCount=passengerCount;
-            // threadData[i].passengerCountLag=passengerCountLag;
-            // threadData[i].direction=direction;
-            // threadData[i].stops=stops;
-            // threadData[i].mainShmPtr=mainShmPtr;
-            // threadData[i].turnRequest=&turnRequest;
-            // threadData[i].solverKey=msg_solver_id[i%m];
-            // threadData[i].k=k;
-
-            // pthread_create(&threads[i], NULL, elevatorTask, (void *)&threadData[i]);
 
             ThreadData data;
             data.elevator=i;
@@ -634,20 +528,10 @@ int main(){
 
             elevatorTask(&data);
         }
-        
-        // for(int i=0; i<n; i++){
-        //     pthread_join(threads[i], NULL);
-        // }
 
         msgsnd(msg_main_id, &turnRequest, sizeof(turnRequest)-sizeof(turnRequest.mtype), 0);
     }
 
-
-    // pthread_mutex_destroy(&mutex);
-    // for(int i=0; i<m; i++){
-    //     pthread_mutex_destroy(&restriction[i]);
-    // }
-    // free(restriction);
     for(int i=0; i<n; i++){
         free(stops[i]);
     }
