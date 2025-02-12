@@ -10,12 +10,10 @@
 #include <limits.h>
 
 #define CAPS 4
-#define DIRECT 4
 
 pthread_mutex_t mutex;
 int m;
 pthread_mutex_t *restriction;
-pthread_mutex_t *ruko;
 int *authStatus;
 
 
@@ -171,17 +169,6 @@ void deleteDropMap(int key, int value){
 
     free(current);
 }
-
-int powr(int a, int b){
-    int result=1;
-
-    for(int i=0; i<b; i++){
-        result*=b;
-    }
-
-    return result;
-}
-
 
 
 typedef struct PassengerRequest{
@@ -521,110 +508,11 @@ void *elevatorTask(void *arg){
     int length=passengerCountLag[elevator];
 
     if(mainShmPtr->elevatorMovementInstructions[elevator]!='s' && length>0){
-        if(length<=DIRECT){
-            authorization(elevator, length, solverKey, mainShmPtr);
-            authStatus[elevator]=1;
-        }
+        authorization(elevator, length, solverKey, mainShmPtr);
+        authStatus[elevator]=1;
     }
     else{
         authStatus[elevator]=1;
-    }
-
-    pthread_exit(NULL);
-}
-
-
-
-void authstringgen(char *authstring, int length, int factor){
-    for(int i=0; i<length; i++){
-        authstring[i]='a'+(factor%6);
-        factor/=6;
-    }
-    authstring[length]='\0';
-}
-
-
-
-void authbythread(int elevator, int length, int solverKey, int solverNumber, MainSharedMemory *mainShmPtr){
-    
-    SolverRequest solRequest;
-    SolverResponse solResponse;
-
-    char stringGuess[25];
-    int factor=(solverNumber*(powr(6, length)))/m;
-
-
-    pthread_mutex_lock(&ruko[solverNumber]);
-
-    solRequest.mtype=2;
-    solRequest.elevatorNumber=elevator;
-    msgsnd(solverKey, &solRequest, sizeof(solRequest)-sizeof(solRequest.mtype), 0);
-
-    while(1){
-
-        // pthread_mutex_lock(&mutex);
-        // if(authStatus[elevator]==1){
-        //     pthread_mutex_unlock(&mutex);
-        //     break;
-        // }
-        // pthread_mutex_unlock(&mutex);
-
-        authstringgen(stringGuess, length, factor);
-        //printf("Thread %d guessed %s\n",solverNumber, stringGuess);
-
-        solRequest.mtype=3;
-        strcpy(solRequest.authStringGuess, stringGuess);
-        msgsnd(solverKey, &solRequest, sizeof(solRequest)-sizeof(solRequest.mtype), 0);
-        msgrcv(solverKey, &solResponse, sizeof(solRequest)-sizeof(solRequest.mtype), 4, 0);
-        
-        pthread_mutex_lock(&mutex);
-        //printf("Thread %d is inside\n",solverNumber);
-        if(solResponse.guessIsCorrect!=0 && authStatus[elevator]==0){
-            strcpy(mainShmPtr->authStrings[elevator], stringGuess);
-            //printf("Thread %d guessed %s correctly\n",solverNumber, stringGuess);
-            authStatus[elevator]=1;
-        }
-        //printf("Thread %d goes outside\n",solverNumber);
-        pthread_mutex_unlock(&mutex);
-
-        if(authStatus[elevator]==1){
-            break;
-        }
-
-        factor++;
-    }
-    
-    //printf("Thread %d exit\n",solverNumber);
-    
-    pthread_mutex_unlock(&ruko[solverNumber]);
-}
-
-
-
-typedef struct AuthThreadData{
-    int *passengerCountLag;
-    MainSharedMemory *mainShmPtr;
-    int solverKey;
-    int solverNumber;
-    int n;
-}AuthThreadData;
-
-
-
-void *authTask(void *arg){
-    AuthThreadData *data=(AuthThreadData *)arg;
-    int *passengerCountLag=data->passengerCountLag;
-    MainSharedMemory *mainShmPtr=data->mainShmPtr;
-    int solverKey=data->solverKey;
-    int solverNumber=data->solverNumber;
-    int n=data->n;
-
-    for(int i=0; i<n; i++){
-        if(authStatus[i]==0){
-            int elevator=i;
-            int length=passengerCountLag[i];
-            authbythread(elevator, length, solverKey, solverNumber, mainShmPtr);
-        }
     }
 
     pthread_exit(NULL);
@@ -680,10 +568,8 @@ int main(){
     authStatus=(int *)malloc(n*sizeof(int));
 
     restriction=(pthread_mutex_t *)malloc(m*sizeof(pthread_mutex_t));
-    ruko=(pthread_mutex_t *)malloc(m*sizeof(pthread_mutex_t));;
     for(int i=0; i<m; i++){
         pthread_mutex_init(&restriction[i], NULL);
-        pthread_mutex_init(&ruko[i], NULL);
     }
     
 
@@ -698,8 +584,6 @@ int main(){
             passengerCountLag[i]=passengerCount[i];
             authStatus[i]=0;
         }
-
-        //printf("%d\n", turnResponse.turnNumber);
 
 
         for(int i=0; turnResponse.turnNumber<=t && i<turnResponse.newPassengerRequestCount; i++){
@@ -741,25 +625,6 @@ int main(){
             pthread_join(threads[i], NULL);
         }
 
-
-        pthread_t auththreads[m];
-        AuthThreadData auththreadData[m];
-
-        for(int i=0; i<m; i++){
-            auththreadData[i].passengerCountLag=passengerCountLag;
-            auththreadData[i].mainShmPtr=mainShmPtr;
-            auththreadData[i].solverKey=msg_solver_id[i];
-            auththreadData[i].solverNumber=i;
-            auththreadData[i].n=n;
-
-            pthread_create(&auththreads[i], NULL, authTask, (void *)&auththreadData[i]);
-        }
-
-        for(int i=0; i<m; i++){
-            pthread_join(auththreads[i], NULL);
-        }
-
-
         msgsnd(msg_main_id, &turnRequest, sizeof(turnRequest)-sizeof(turnRequest.mtype), 0);
     }
 
@@ -767,13 +632,11 @@ int main(){
     pthread_mutex_destroy(&mutex);
     for(int i=0; i<m; i++){
         pthread_mutex_destroy(&restriction[i]);
-        pthread_mutex_destroy(&ruko[i]);
     }
     free(restriction);
     for(int i=0; i<n; i++){
         free(stops[i]);
     }
-    free(ruko);
     free(stops);
     shmdt(mainShmPtr);
     

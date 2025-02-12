@@ -6,9 +6,8 @@ Testcase 5 - 25 Elevators | 150 Floors | 10 Solvers | 50 Turns | 400 Requests
 Testcase 6 - 4 Elevators | 100 Floors | 2 Solvers | 20 Turns | 200 Requests
 Testcase 7 - 10 Elevators | 100 Floors | 5 Solvers | 25 Turns | 500 Requests
 Testcase 8 - 5 Elevators | 300 Floors | 5 Solvers | 100 Turns | 200 Requests
-
-Hidden Testcase 1 - 8 Elevators | 20 Floors | 8 Solvers | 30 Turns | 500 Requests
-Hidden Testcase 2 - 30 Elevators | 100 Floors | 20 Solvers | 20 Turns | 300 Requests
-Hidden Testcase 3 - 20 Elevators | 200 Floors | 5 Solvers | 50 Turns | 250 Requests
-Hidden Testcase 4 - 5 Elevators | 100 Floors | 5 Solvers | 50 Turns | 400 Requests
-Hidden Testcase 5 - 25 Elevators | 300 Floors | 25 Solvers | 25 Turns | 400 Requests
+Testcase 9 - 8 Elevators | 20 Floors | 8 Solvers | 30 Turns | 500 Requests
+Testcase 10 - 30 Elevators | 100 Floors | 20 Solvers | 20 Turns | 300 Requests
+Testcase 11 - 20 Elevators | 200 Floors | 5 Solvers | 50 Turns | 250 Requests
+Testcase 12 - 5 Elevators | 100 Floors | 5 Solvers | 50 Turns | 400 Requests
+Testcase 13 - 25 Elevators | 300 Floors | 25 Solvers | 25 Turns | 400 Requests
