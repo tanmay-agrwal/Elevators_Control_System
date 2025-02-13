@@ -28,8 +28,8 @@ int main(int argc, char *argv[])
   int elevatorCount, buildingHeight, solverCount, lastRequestTimestamp,
       passengerRequestCount;
 
-  char testcaseFileName[15];
-  sprintf(testcaseFileName, "testcase%s.txt", argv[1]);
+  char testcaseFileName[35];
+  sprintf(testcaseFileName, "Test_Cases/testcase%s.txt", argv[1]);
   FILE *testcaseFile = fopen(testcaseFileName, "r");
   if (testcaseFile == NULL)
   {
