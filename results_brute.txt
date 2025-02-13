@@ -1,0 +1,15 @@
+Test Case No:		1
+Time Taken:			0.01 s
+Number of Turns:	10
+Elevator Movement:	14
+
+Test Case No:		2
+Time Taken:			25.35 s
+Number of Turns:	688
+Elevator Movement:	1214
+
+Test Case No:		3
+Time Taken:			237.27 s
+Number of Turns:	3450
+Elevator Movement:	10028
+

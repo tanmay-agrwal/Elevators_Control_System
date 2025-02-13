@@ -412,15 +412,6 @@ void elevatorTask(ThreadData *data){
     else if(upRequired==0 && downRequired==1){
         direction[elevator]='d';
     }
-    else{
-        if(upDist<=downDist){
-            direction[elevator]='u';
-        }
-        else{
-            direction[elevator]='d';
-        } 
-    }
-
 
     mainShmPtr->elevatorMovementInstructions[elevator]=direction[elevator];
 
@@ -434,7 +425,6 @@ void elevatorTask(ThreadData *data){
         authStatus[elevator]=1;
     }
 }
-
 
 
 int main(){

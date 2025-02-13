@@ -538,7 +538,64 @@ int main(int argc, char *argv[])
   double result =
       ((stop.tv_sec - start.tv_sec)) + ((stop.tv_usec - start.tv_usec) / 1e6);
 
+  // Save the result
+  FILE *file = fopen("results_mt.txt", "r");
+  FILE *temp = fopen("temp.txt", "w");
   
+  if (!temp)
+  {
+      printf("Error opening results file for writing!\n");
+      exit(1);
+  }
+  
+  int found = 0;
+  char line[100], testCaseID[50];
+  
+  // Read existing entries and process them
+  if (file)
+  {
+      while (fgets(line, sizeof(line), file))
+      {
+          if (sscanf(line, "Test Case No:\t\t%49s", testCaseID) == 1)
+          {
+              if (strcmp(testCaseID, argv[1]) == 0)
+              {
+                  // Skip the next 3 lines (result, turnNumber, movements) since we are updating
+                  fgets(line, sizeof(line), file);
+                  fgets(line, sizeof(line), file);
+                  fgets(line, sizeof(line), file);
+  
+                  // Write the updated result
+                  fprintf(temp, "Test Case No:\t\t%s\n", argv[1]);
+                  fprintf(temp, "Time Taken:\t\t\t%.2lf s\n", errorOccured ? -1.0 : result);
+                  fprintf(temp, "Number of Turns:\t%d\n", turnNumber);
+                  fprintf(temp, "Elevator Movement:\t%d\n", totalElevatorMovement);
+  
+                  found = 1;
+                  continue;
+              }
+          }
+          // Keep existing content
+          fprintf(temp, "%s", line);
+      }
+      fclose(file);
+  }
+  
+  // Append new entry if the test case was not found
+  if (!found)
+  {
+      fprintf(temp, "Test Case No:\t\t%s\n", argv[1]);
+      fprintf(temp, "Time Taken:\t\t\t%.2lf s\n", errorOccured ? -1.0 : result);
+      fprintf(temp, "Number of Turns:\t%d\n", turnNumber);
+      fprintf(temp, "Elevator Movement:\t%d\n\n", totalElevatorMovement);
+  }
+  
+  fclose(temp);
+  
+  // Replace old results file with updated file
+  remove("results_mt.txt");
+  rename("temp.txt", "results_mt.txt");
+
   // Print their result
   if (errorOccured)
   {
