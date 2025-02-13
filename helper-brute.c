@@ -567,7 +567,7 @@ int main(int argc, char *argv[])
   
                   // Write the updated result
                   fprintf(temp, "Test Case No:\t\t%s\n", argv[1]);
-                  fprintf(temp, "Time Taken:\t\t\t%.2lf s\n", errorOccured ? -1.0 : result);
+                  fprintf(temp, "Time Taken:\t\t%.2lf s\n", errorOccured ? -1.0 : result);
                   fprintf(temp, "Number of Turns:\t%d\n", turnNumber);
                   fprintf(temp, "Elevator Movement:\t%d\n", totalElevatorMovement);
   
@@ -585,7 +585,7 @@ int main(int argc, char *argv[])
   if (!found)
   {
       fprintf(temp, "Test Case No:\t\t%s\n", argv[1]);
-      fprintf(temp, "Time Taken:\t\t\t%.2lf s\n", errorOccured ? -1.0 : result);
+      fprintf(temp, "Time Taken:\t\t%.2lf s\n", errorOccured ? -1.0 : result);
       fprintf(temp, "Number of Turns:\t%d\n", turnNumber);
       fprintf(temp, "Elevator Movement:\t%d\n\n", totalElevatorMovement);
   }
