@@ -1,0 +1,65 @@
+Test Case No:		1
+Time Taken:		0.01 s
+Number of Turns:	10
+Elevator Movement:	14
+
+Test Case No:		2
+Time Taken:		25.22 s
+Number of Turns:	688
+Elevator Movement:	1214
+
+Test Case No:		3
+Time Taken:		220.55 s
+Number of Turns:	3450
+Elevator Movement:	10028
+
+Test Case No:		4
+Time Taken:		393.15 s
+Number of Turns:	5793
+Elevator Movement:	17616
+
+Test Case No:		5
+Time Taken:		245.62 s
+Number of Turns:	1544
+Elevator Movement:	12975
+
+Test Case No:		6
+Time Taken:		88.03 s
+Number of Turns:	1223
+Elevator Movement:	4241
+
+Test Case No:		7
+Time Taken:		211.69 s
+Number of Turns:	1269
+Elevator Movement:	9787
+
+Test Case No:		8
+Time Taken:		263.93 s
+Number of Turns:	5236
+Elevator Movement:	12728
+
+Test Case No:		9
+Time Taken:		44.10 s
+Number of Turns:	257
+Elevator Movement:	1851
+
+Test Case No:		10
+Time Taken:		108.40 s
+Number of Turns:	614
+Elevator Movement:	7620
+
+Test Case No:		11
+Time Taken:		204.80 s
+Number of Turns:	1882
+Elevator Movement:	10402
+
+Test Case No:		12
+Time Taken:		193.43 s
+Number of Turns:	1728
+Elevator Movement:	6886
+
+Test Case No:		13
+Time Taken:		415.49 s
+Number of Turns:	1822
+Elevator Movement:	25769
+
